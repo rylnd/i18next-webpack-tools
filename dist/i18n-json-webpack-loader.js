@@ -40,15 +40,16 @@ var stringifyTerms = function (terms) {
 exports.writeTermsToFiles = function (terms) {
     return file_1.languages().reduce(function (result, dir) {
         var translations = file_1.loadTranslationFile(dir) || [];
+        var filePath = path_1.join(exports.OPTIONS.translationsDir, dir, 'common.json');
         var termsToWrite = terms.reduce(function (result, term) {
             var match = findTerm(term, translations);
             if (!match)
                 result.push({ term: term, definition: '' });
             return result;
         }, []);
-        var blep = stringifyTerms(translations.concat(termsToWrite));
-        var filePath = path_1.join(exports.OPTIONS.translationsDir, dir, 'common.json');
-        result[dir] = fs_extra_1.writeFileSync(filePath, blep, 'utf8');
+        var allTerms = translations.concat(termsToWrite);
+        var sortedTerms = allTerms.sort(function (a, b) { return a.term.localeCompare(b.term); });
+        result[dir] = fs_extra_1.writeFileSync(filePath, stringifyTerms(allTerms), 'utf8');
         return result;
     }, {});
 };
