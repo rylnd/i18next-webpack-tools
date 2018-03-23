@@ -9,22 +9,19 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var CopyPlugin = require("copy-webpack-plugin");
-var transform = function (buffer) {
+exports.transform = function (buffer) {
     var content = JSON.parse(buffer.toString());
     var newContent = content.reduce(function (result, translation) {
         var term = translation.term;
         var definition = translation.definition || '';
         var one = definition.one, other = definition.other, many = definition.many, few = definition.few;
+        var plural = other || many || few;
         if (typeof definition !== 'object') {
             var def = (typeof definition === 'string') && definition;
             def = def || other || many || few || term;
             return Object.assign(result, (_a = {}, _a[term] = def, _a));
         }
-        if (definition && one) {
-            var plural = other || many || few || term;
-            return Object.assign(result, (_b = {}, _b[term] = one || term, _b), other && (_c = {}, _c[term + "_plural"] = plural, _c));
-        }
-        return Object.assign(result, { term: term });
+        return Object.assign(result, (_b = {}, _b[term] = one || plural || term, _b), plural && (_c = {}, _c[term + "_plural"] = plural || term, _c));
         var _a, _b, _c;
     }, {});
     return Buffer.from(JSON.stringify(newContent, null, 2));
@@ -34,7 +31,7 @@ var defaultPattern = {
     from: '**/*.json',
     to: 'locales/',
     force: true,
-    transform: transform,
+    transform: exports.transform,
 };
 function I18nJsonTransform(patterns, options) {
     if (patterns === void 0) { patterns = [{}]; }
